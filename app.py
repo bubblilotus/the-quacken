@@ -2,27 +2,33 @@ import pygame
 import random
 import math
 import time
-screen_width = 800
-max_distance = 290
-min_distance = 125
+import os
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+import streamlit as st
+
+st.set_page_config(layout="wide") #remove margins
+screen_width = 1920
+screen_height = 1080
+max_distance = 400
+min_distance = 230
 #starting size of our quacken
-QUACKEN_BASE_SIZE = 150
-DUCKLING_SIZE = 30
-NUCLEUS_CENTER_X = 400
-NUCLEUS_CENTER_Y = 300
+QUACKEN_BASE_SIZE = 300
+DUCKLING_SIZE = 50
+NUCLEUS_CENTER_X = screen_width/2
+NUCLEUS_CENTER_Y = screen_height/2
 # Colors
 water_blue = (255,236,242)
 slider_bg = (255,124,178)
 knob_color = (255,247,250)
 pygame.font.init()
 title_font = pygame.font.SysFont("Verdana", 32, bold=True)
-label_font = pygame.font.SysFont("Verdana", 18)
-instructions_font = pygame.font.SysFont("Verdana", 16, italic=True)
+label_font = pygame.font.SysFont("Verdana", 24)
+instructions_font = pygame.font.SysFont("Verdana", 24, italic=True)
+# Create the slider in the sidebar
+st.sidebar.header("Controls")
 #initialize pygame window
 def intialize_pygame():
     pygame.init()
-    screen_width = 800
-    screen_height = 600
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("The Quacken: Atomic Tug of War")
 
@@ -37,24 +43,24 @@ def draw_ui_elements(screen, current_protons):
 
     #title
     title_surf = title_font.render("The Quacken: Subatomic Tug-of-War", True, text_color)
-    screen.blit(title_surf, (20, 20))
+    screen.blit(title_surf, (screen_width // 2 - title_surf.get_width() // 2, 50))
 
     #description
     desc_text = "See how increasing protons decreases atomic radius by pulling electrons closer to the nucleus!"
     desc_surf = instructions_font.render(desc_text, True, text_color)
-    screen.blit(desc_surf, (20, 60))
+    screen.blit(desc_surf, (screen_width // 2 - desc_surf.get_width() // 2, 100))
 
     #slider label
     # Position this right above your slider bar
-    label_text = f"Number of Protons: {int(current_protons)}"
-    label_surf = label_font.render(label_text, True, text_color)
-
-    screen.blit(label_surf, (screen_width // 2 - label_surf.get_width() // 2, 470))
+    # label_text = f"Number of Protons: {int(current_protons)}"
+    # label_surf = label_font.render(label_text, True, text_color)
+    #
+    # screen.blit(label_surf, (screen_width // 2 - label_surf.get_width() // 2, screen_height -100))
     #instructions
-    prompt_surf = instructions_font.render("Drag the slider to increase the number of protons (the muscle) " + "\n" +
+    prompt_surf = instructions_font.render("Drag the slider to increase the number of protons (the muscle) " +
                                            "and watch the quacken (nucleus) pull the ducklings (electrons) with more force" + "\n"
                                            + "due to the stronger positive charge pulling the electrons inward!", True, text_color)
-    screen.blit(prompt_surf, (screen_width // 2 - prompt_surf.get_width() // 2, 540))
+    screen.blit(prompt_surf, (screen_width // 2 - prompt_surf.get_width() // 2, screen_height-100))
 #more protons => greater inclear charge => shorter distance
 #formula: r = Max_Distance / sqrt(protons
 #using sqrt to make the movement look more natural/satisfying.
@@ -110,7 +116,7 @@ def handle_input(protons, dragging, slider_x, slider_width, slider_y):
 
 def draw_ropes(screen, radius):
     #center of the nucleus
-    cx, cy = 400, 300
+    cx, cy = NUCLEUS_CENTER_X, NUCLEUS_CENTER_Y
     rope_color = (150, 121, 105)  # A deeper, "Rich Academic" brown
 
     #4 ropes that look like they are pulling the circle inward
@@ -157,7 +163,7 @@ def draw_duckling(screen, protons, radius):
         #make them jitter
         #the closer electrons are to the nucleus the more stable they are
         #as radius goes down, so should the jitter
-        jitter = int(radius * 0.03)
+        jitter = int(radius * 0.05)
         final_x = orbit_x + random.randint(-jitter, jitter)
         final_y = orbit_y + random.randint(-jitter, jitter)
 
@@ -199,9 +205,12 @@ duckling_img = pygame.image.load("duckling.png").convert_alpha()
 # Get original dimensions for scaling
 q_width, q_height = quacken_img.get_size()
 d_width, d_height = duckling_img.get_size()
+frame_placeholder = st.empty()
+protons = st.sidebar.slider("Number of Protons", min_value=1, max_value=10, value=1)
+
 while running:
     # check for clicks/events
-    protons, dragging, running = handle_input(protons, dragging, slider_x, slider_width, slider_y)
+    # protons, dragging, running = handle_input(protons, dragging, slider_x, slider_width, slider_y)
 
     # update distance and muscle size
     radius = calculate_distance(protons)
@@ -215,10 +224,13 @@ while running:
     draw_quacken(screen, protons)
     draw_duckling(screen, protons, radius)
     draw_ui_elements(screen, protons)
-    draw_slider(protons)
+    # draw_slider(protons)
 
-    pygame.display.flip()
-
+    # pygame.display.flip()
+    #getting the pixel data from pygame frame
+    view = pygame.surfarray.array3d(screen)
+    view = view.transpose([1, 0, 2])
+    frame_placeholder.image(view, channels="RGB", use_container_width=False)
     # print(f"At {protons} proton(s):")
     # print(f"- The duckling is {radius:.2f} pixels away.")
     # print(f"- The quacken is at {scale:.2f}x size.")
