@@ -1,7 +1,7 @@
 The Quacken: Subatomic Tug-of-War" - The Quacken" is a simple, interactive way to see how adding protons to a nucleus pulls the electron shell closer. It’s a subatomic tug-of-war that shows exactly why atoms get smaller as they gain more "muscle" in the middle.
 I built this to help my 7th graders, who are at the concerete operational stage in their congnitive development, wrap their heads around this abstract idea of how adding more protons reduces atomic radius. It turns a dry chemistry concept into something they can actually play with. Plus, it’s cute!
 
-🔗 View the Live App Here
+**[🔗 View the Live App Here](https://thequacken.streamlit.app/)**
 
 What's inside
 The "Muscle" Metaphor: As you slide the bar, the Quacken (the nucleus) gets bigger and stronger, physically pulling the "ducklings" (electrons) inward.
